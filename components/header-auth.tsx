@@ -37,7 +37,7 @@ export default async function AuthButton() {
             <Button
               asChild
               size="sm"
-              variant={"default"}
+              variant={"outline"}
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
@@ -62,7 +62,7 @@ export default async function AuthButton() {
       <Button asChild size="sm" variant={"outline"}>
         <Link href="/sign-in">Sign in</Link>
       </Button>
-      <Button asChild size="sm" variant={"default"}>
+      <Button asChild size="sm" variant={"outline"}>
         <Link href="/sign-up">Sign up</Link>
       </Button>
     </div>
