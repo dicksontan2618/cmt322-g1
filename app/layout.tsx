@@ -2,7 +2,9 @@ import HeaderAuth from "@/components/header-auth";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+
 import Navbar from "@/components/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -44,7 +46,8 @@ export default function RootLayout({
           <div className="mt-16 bg-slate-100 min-h-screen">
             {children}
           </div>
-          
+        
+        <Toaster />
         </ThemeProvider>
       </body>
     </html>

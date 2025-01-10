@@ -1,23 +1,22 @@
-'use client';
+"use client"
 
-import { signUpAction } from "@/app/actions";
+import { signInEmployerAction } from "@/app/actions";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useForm } from "react-hook-form";
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import { useToast } from "@/hooks/use-toast"
-import { createElement, useState } from "react";
 
-import Link from "next/link";
+import Link from "next/link"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Box } from "@/components/ui/box";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Box } from "@/components/ui/box"
+
+import { createElement, useState } from "react"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -26,45 +25,44 @@ const formSchema = z.object({
     })
 })
 
-export default function Signup() {
+function EmployerSignInPage() {
 
-  const [passwordVisibility, setPasswordVisibility] = useState(false);
+    const [passwordVisibility, setPasswordVisibility] = useState(false);
 
-  const { toast } = useToast()
+    const { toast } = useToast()
 
-  interface FormValues {
-    email: string;
-    password: string;
-  }
+    interface FormValues {
+        email: string;
+        password: string;
+    }
 
-  const form = useForm<FormValues>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {  
-        email: "",
-        password: "",
-      },
-  })
+    const form = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+        },
+    })
 
-  async function onSubmit(values: FormValues) {
-    const result = await signUpAction(values, "student");
+    async function onSubmit(values: FormValues) {
     
-    const status = result.status;
-    const message = result.message;
+        const result = await signInEmployerAction(values);
+        
+        const status = result.status;
+        const message = result.message;
 
-    toast({
-        variant: status === "error" ? "destructive" : "default",
-        title: status === "error" ? "Error" : "Success",
-        description: message || "Something went wrong",
-    });
+        toast({
+            variant: status === "error" ? "destructive" : "default",
+            title: status === "error" ? "Error" : "Success",
+            description: message || "Something went wrong",
+        });
 
     }
 
-  return (
-    <div className="min-h-screen px-8 mb-8 lg:px-16 lg:py-8 text-primary">
-        <Card className="m-auto w-full bg-white md:w-3/4 lg:w-1/3">
+    return (
+    <div className="px-8 mb-8 lg:px-16 lg:py-8 text-primary">
+        <Card className="m-auto bg-white w-full md:w-3/4 lg:w-1/3">
             <CardHeader>
-                <CardTitle>Sign Up</CardTitle>
-                <CardDescription>Sign up to access more features!</CardDescription>
+                <CardTitle>Employer Portal</CardTitle>
+                <CardDescription>Login to your employer account.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -112,23 +110,20 @@ export default function Signup() {
                         />
                         <Button type="submit" className="bg-secondary text-white mt-8" disabled={form.formState.isSubmitting}>
                             {form.formState.isSubmitting ? (
-                                <span>Signing up...</span>
+                                <span>Signing in...</span>
                             ) : (
-                                <span>Sign up</span>
+                                <span>Sign in</span>
                             )}
                         </Button>
                     </form>
                 </Form>
             </CardContent>
             <CardFooter className="flex justify-between text-sm font-semibold text-wrap">
-                <Link href="/sign-in" className="w-1/2">Already have an account?</Link>
-                <div className="flex h-4 items-center space-x-2 md:space-x-3">
-                    <Link href="/sign-in/employer" className="w-1/2 text-right text-xs md:text-sm">Employer?</Link>
-                    <Separator orientation="vertical" />
-                    <Link href="/sign-in/admin" className="w-1/2 text-right text-xs md:text-sm">Admin?</Link>
-                </div>
+                <Link href="/sign-in" className="w-1/2">Not an employer?</Link>
             </CardFooter>
         </Card>
     </div>
-  );
+  )
 }
+
+export default EmployerSignInPage

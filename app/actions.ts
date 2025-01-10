@@ -5,55 +5,151 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const signUpAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  interface FormValues {
+    email: string;
+    password: string;
+  }
+
+export const signUpAction = async (formData: FormValues, role: String ) => {
+
+  const email = formData.email as string;
+  const password = formData.password as string;
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required",
-    );
-  }
-
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        role: role,
+      },
     },
   });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
+  let authMsg = null;
+
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    authMsg = {
+      status: "error",
+      message: "User already exists",
+    };
+  } else if (error) {
+    authMsg = {
+      status: error.name,
+      message: error.message,
+    };
   } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+    authMsg = {
+      status: "success",
+      message: "Thanks for signing up! Please check your email for a verification link.",
+    };
   }
+
+  return authMsg;
 };
 
-export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+export const signInStudentAction = async (formData: FormValues) => {
+  const email = formData.email as string;
+  const password = formData.password as string;
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: user, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return {
+      status: "error",
+      message: "Wrong Email/Password",
+    };
   }
 
-  return redirect("/protected");
+  const { data: userDetails, error: roleError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.user?.id)
+    .single();
+
+  if (roleError || !userDetails || userDetails.role !== 'student') {
+    await supabase.auth.signOut(); 
+    return {
+      status: "error",
+      message: "Not Student Role",
+    };
+  }
+
+  return redirect("/profile/student");
+};
+
+export const signInEmployerAction = async (formData: FormValues) => {
+  const email = formData.email as string;
+  const password = formData.password as string;
+  const supabase = await createClient();
+
+  const { data: user, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Wrong Email/Password",
+    };
+  }
+
+  const { data: userDetails, error: roleError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.user?.id)
+    .single();
+
+  if (roleError || !userDetails || userDetails.role !== 'employer') {
+    await supabase.auth.signOut(); 
+    return {
+      status: "error",
+      message: "Not Employer Role",
+    };
+  }
+
+  return redirect("/profile/employer");
+};
+
+export const signInAdminAction = async (formData: FormValues) => {
+  const email = formData.email as string;
+  const password = formData.password as string;
+  const supabase = await createClient();
+
+  const { data: user, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Wrong Email/Password",
+    };
+  }
+
+  const { data: userDetails, error: roleError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.user?.id)
+    .single();
+
+  if (roleError || !userDetails || userDetails.role !== 'admin') {
+    await supabase.auth.signOut(); 
+    return {
+      status: "error",
+      message: "Not Admin Role",
+    };
+  }
+
+  return redirect("/profile/admin");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -130,5 +226,5 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };

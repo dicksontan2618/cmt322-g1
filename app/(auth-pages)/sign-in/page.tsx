@@ -1,44 +1,135 @@
-import { signInAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+'use client'
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
+import { signInStudentAction } from "@/app/actions";
+
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useToast } from "@/hooks/use-toast"
+
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Box } from "@/components/ui/box"
+import { Separator } from "@/components/ui/separator"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+
+import Link from "next/link";
+import { createElement, useState } from "react"
+
+const formSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8, {
+        message: "Password must be at least 8 characters."
+    })
+})
+
+
+export default function Login() {
+
+  const [passwordVisibility, setPasswordVisibility] = useState(false);
+
+  const { toast } = useToast()
+
+  interface FormValues {
+    email: string;
+    password: string;
+  }
+
+  const form = useForm<FormValues>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {  
+        email: "",
+        password: "",
+      },
+  })
+
+  async function onSubmit(values: FormValues) {
+
+    const result = await signInStudentAction(values);
+    
+    const status = result.status;
+    const message = result.message;
+
+    toast({
+        variant: status === "error" ? "destructive" : "default",
+        title: status === "error" ? "Error" : "Success",
+        description: message || "Something went wrong",
+    });
+
+  }
+
   return (
-    <form className="flex flex-col w-64 mx-auto">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
-        </div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Your password"
-          required
-        />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
-          Sign in
-        </SubmitButton>
-        <FormMessage message={searchParams} />
-      </div>
-    </form>
+    <div className="min-h-screen px-8 mb-8 lg:px-16 lg:py-8 text-primary">
+        <Card className="m-auto bg-white w-full md:w-3/4 lg:w-1/3">
+            <CardHeader>
+                <CardTitle>Student Sign In</CardTitle>
+                <CardDescription>Login to your account.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="x.@gmail.com" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <Box className="relative">
+                                        <Input
+                                            {...field}
+                                            type={passwordVisibility ? "text" : "password"}
+                                            autoComplete="on"
+                                            placeholder=""
+                                        />
+                                        <Box
+                                            className="absolute inset-y-0 right-0 flex cursor-pointer items-center p-3 text-muted-foreground"
+                                            onClick={() => setPasswordVisibility(!passwordVisibility)}
+                                        >
+                                            {createElement(passwordVisibility ? EyeOffIcon : EyeIcon , {
+                                            className: "h-6 w-6",
+                                            })}
+                                        </Box>
+                                    </Box>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                        />
+                        <Button type="submit" className="bg-secondary text-white mt-8" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
+                                <span>Signing in...</span>
+                            ) : (
+                                <span>Sign in</span>
+                            )}
+                        </Button>
+                    </form>
+                </Form>
+            </CardContent>
+            <CardFooter className="flex justify-between text-sm font-semibold text-wrap">
+                <Link href="/sign-up" className="w-1/2">Didn't have an account?</Link>
+                <div className="flex h-4 items-center space-x-2 md:space-x-3">
+                    <Link href="/sign-in/employer" className="w-1/2 text-right text-xs md:text-sm">Employer?</Link>
+                    <Separator orientation="vertical" />
+                    <Link href="/sign-in/admin" className="w-1/2 text-right text-xs md:text-sm">Admin?</Link>
+                </div>
+            </CardFooter>
+        </Card>
+    </div>
   );
 }
