@@ -1,101 +1,20 @@
 'use client'
 
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react";
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-      message: "Name must be at least 2 characters."
-  }),
-  studyYear: z.coerce.number().min(1, {
-      message: "Study year should be 1-4."
-  }).max(4, {
-      message: "Study year should be 1-4."
-  }),
-  specialization: z.string(),
-})
-
-export default function StudentProfile() {
+export default function StudentProfile({
+  children,
+}: {
+  children: React.ReactNode
+}){
 
     const [selectedOption, setSelectedOption] = useState("Profile");
-
-    const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {  
-        username: "Ong Chu Jun",
-        studyYear: 4,
-        specialization: "ic",
-        password: "test123"
-        },
-    })
-
-    function onSubmit(values: any) {
-        console.log(values);
-    }
 
     // Render content based on selected option
     const renderContent = () => {
         switch (selectedOption) {
         case "Profile":
-            return <div className="p-4 text-black"><Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FormField
-                        control={form.control}
-                        name="username"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Student Name</FormLabel>
-                                <FormControl>
-                                    <Input className="bg-white" placeholder="Enter your name..." {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="studyYear"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Student Year</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Year" {...field} className="md:w-1/4 bg-white" />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="specialization"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Major Specialization</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl className="bg-white">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select specialization" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="bg-white text-primary">
-                                    <SelectItem value="se">Software Engineering</SelectItem>
-                                    <SelectItem value="ic">Intelligent Computing</SelectItem>
-                                    <SelectItem value="ci">Computing Infrastructure</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <Button type="submit" className="bg-secondary text-white mt-8">Save</Button>
-                    </form>
-                </Form></div>;
+            return children;
         case "Saved Jobs":
             return (
             <div className="p-4">
@@ -128,7 +47,7 @@ export default function StudentProfile() {
     return (
         <div className="flex min-h-screen bg-slate-100">
         {/* Left Navigation Section */}
-        <div className="w-1/5 min-h-full bg-slate-200">
+        <div className="w-1/5 min-h-full bg-slate-200 mt-4">
             <ul>
             <li>
                 <button

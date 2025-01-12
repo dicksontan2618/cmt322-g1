@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 import EmployerProfile from "@/components/EmployerProfile";
+import EmployerProfileForm from "@/components/EmployerProfileForm";
 
 export default async function EmployerPage() {
 
@@ -20,6 +21,8 @@ export default async function EmployerPage() {
     }
 
     return (
-        <EmployerProfile/>
+        <EmployerProfile>
+            <EmployerProfileForm/>
+        </EmployerProfile>
     );
 }

@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 import StudentProfile from "@/components/StudentProfile";
+import StudentProfileForm from "@/components/StudentProfileForm";
 
 export default async function StudentPage() {
 
@@ -20,6 +21,8 @@ export default async function StudentPage() {
     }
 
     return (
-        <StudentProfile/>
+        <StudentProfile>
+            <StudentProfileForm />
+        </StudentProfile>
     );
 }

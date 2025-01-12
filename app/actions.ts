@@ -84,6 +84,69 @@ export const signInStudentAction = async (formData: FormValues) => {
   return redirect("/profile/student");
 };
 
+export const studentUpdateProfileAction = async (formData: any) => {
+
+  const supabase = await createClient();
+
+  const id = formData.id as string;
+  const name = formData.username as string;
+  const year = formData.studyYear as string;
+  const specialization = formData.specialization as string;
+
+
+  const { data, error } = await supabase
+    .from("students")
+    .upsert({
+      id,
+      name,
+      year,
+      specialization,
+    });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Could not update profile",
+    };
+  } else {
+    return {
+      status: "success",
+      message: "Profile updated",
+    };
+  }
+
+}
+
+export const employerUpdateProfileAction = async (formData: any) => {
+
+  const supabase = await createClient();
+
+  const id = formData.id as string;
+  const name = formData.companyName as string;
+  const description = formData.companyDesc as string;
+
+  const { data, error } = await supabase
+    .from("employers")
+    .upsert({
+      id,
+      name,
+      description,
+    });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Could not update profile",
+    };
+  } else {
+    return {
+      status: "success",
+      message: "Profile updated",
+    };
+  }
+
+}
+
 export const signInEmployerAction = async (formData: FormValues) => {
   const email = formData.email as string;
   const password = formData.password as string;
