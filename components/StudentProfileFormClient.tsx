@@ -36,7 +36,6 @@ export interface StudentProfileFormProps {
   };
 }
 
-
 export default function StudentProfileFormClient({initialData}: StudentProfileFormProps) {
 
     const { toast } = useToast();

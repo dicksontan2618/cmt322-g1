@@ -215,6 +215,94 @@ export const signInAdminAction = async (formData: FormValues) => {
   return redirect("/profile/admin");
 };
 
+export const employerCreateJobAction = async (formData: any) => {
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const title = formData.jobTitle as string;
+  const mode = formData.workMode as string;
+  const category = formData.category as string;
+  const qualification = formData.minQualifications as string;
+  const salary = formData.salaryRange as string;
+  const description = formData.jobDesc as string;
+  const skills = formData.requiredSkills as string;
+  const employer_id = user?.id as string;
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .insert({
+      title,
+      mode,
+      category,
+      qualification,
+      salary,
+      description,
+      skills,
+      employer_id,
+    });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Could not create job",
+    };
+  } else {
+    return {
+      status: "success",
+      message: "Job Created",
+    };
+  }
+
+}
+
+export const employerEditJobAction = async (formData: any) => {
+
+  const supabase = await createClient();
+
+  console.log(formData);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const title = formData.jobTitle as string;
+  const mode = formData.workMode as string;
+  const category = formData.category as string;
+  const qualification = formData.minQualifications as string;
+  const salary = formData.salaryRange as string;
+  const description = formData.jobDesc as string;
+  const skills = formData.requiredSkills as string;
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({
+      title,
+      mode,
+      category,
+      qualification,
+      salary,
+      description,
+      skills,
+    }).eq("id", formData.id);
+
+  if (error) {
+    return {
+      status: "error",
+      message: "Could not update job",
+    };
+  } else {
+    return {
+      status: "success",
+      message: "Job Updated",
+    };
+  }
+
+}
+
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();
