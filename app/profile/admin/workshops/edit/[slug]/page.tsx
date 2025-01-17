@@ -30,7 +30,7 @@ export default async function AdminEditWorkshopPage({ params }: { params: Params
         data: workshopData,
         error
     } = await supabase.from("workshops").select("*").eq("id", slug).single();
-    
+
     return (
         <AdminWorkshopEditForm workshopData={workshopData}/>
     )

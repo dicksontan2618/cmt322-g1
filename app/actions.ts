@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache"
 
   interface FormValues {
     email: string;
@@ -396,29 +397,30 @@ export const adminCreateWorkshopAction = async (formData: any) => {
   const speakerRole = formData.speakerRole as string;
   const speakerLinkedIn = formData.speakerLinkedIn as string;
   const workshopDesc = formData.workshopDesc as string;
-  // const workshopThumbnailImg = formData.workshopThumbnailImg as File;
-  // const workshopDetailImg = formData.workshopDetailImg as File;
+  const workshopThumbnailImg = formData.workshopThumbnailImg as File;
+  const workshopDetailImg = formData.workshopDetailImg as File;
   const workshopTag = formData.workshopTag as string;
 
   try {
-    // Upload images to Supabase storage
-    // const uploadImage = async (file: File, path: string) => {
-    //   const { data, error } = await supabase.storage
-    //     .from("workshop-images")
-    //     .upload(path, file, { cacheControl: "3600", upsert: false });
+    //Upload images to Supabase storage
+    const uploadImage = async (file: File, path: string) => {
+      const { data, error } = await supabase
+        .storage
+        .from("workshop-thumbnail")
+        .upload(path, file);
 
-    //   if (error) throw error;
+      if (error) throw error;
 
-    //   return data?.path;
-    // };
+      return data?.path;
+    };
 
-    // const thumbnailPath = workshopThumbnailImg
-    //   ? await uploadImage(workshopThumbnailImg, `thumbnails/${Date.now()}_${workshopThumbnailImg.name}`)
-    //   : null;
+    const thumbnailPath = workshopThumbnailImg
+      ? await uploadImage(workshopThumbnailImg, `thumbnails/${Date.now()}_${workshopThumbnailImg.name}`)
+      : null;
 
-    // const detailImagePath = workshopDetailImg
-    //   ? await uploadImage(workshopDetailImg, `details/${Date.now()}_${workshopDetailImg.name}`)
-    //   : null;
+    const detailImagePath = workshopDetailImg
+      ? await uploadImage(workshopDetailImg, `details/${Date.now()}_${workshopDetailImg.name}`)
+      : null;
 
     // Insert workshop data into the database
     const { data, error } = await supabase
@@ -433,8 +435,8 @@ export const adminCreateWorkshopAction = async (formData: any) => {
         speaker_role: speakerRole,
         speaker_linkedin: speakerLinkedIn,
         description: workshopDesc,
-        // thumbnail_img: thumbnailPath,
-        // detail_img: detailImagePath,
+        thumbnail_img: thumbnailPath,
+        detail_img: detailImagePath,
         tag: workshopTag,
       });
 
@@ -500,4 +502,105 @@ export const adminEditWorkshopAction = async (formData: any) => {
       message: error.message || "Failed to update workshop",
     };
   }
+};
+
+export async function deleteWorkshopAction(workshopId: number) {
+  try {
+      const supabase = await createClient()
+
+      // First check if user is admin
+      const { data: user, error: userError } = await supabase
+          .from("profiles")
+          .select("role")
+          .single()
+
+      if (userError || !user || user.role !== "admin") {
+          return {
+              status: "error",
+              message: "Unauthorized access"
+          }
+      }
+
+      // Delete related records first (assuming there's a workshop_registrations table)
+      const { error: registrationsError } = await supabase
+          .from("workshop_application")
+          .delete()
+          .eq("workshop_id", workshopId)
+
+      if (registrationsError) {
+          console.error("Error deleting workshop registrations:", registrationsError)
+          return {
+              status: "error",
+              message: "Failed to delete workshop registrations"
+          }
+      }
+
+      // Then delete the workshop
+      const { error: workshopError } = await supabase
+          .from("workshops")
+          .delete()
+          .eq("id", workshopId)
+
+      if (workshopError) {
+          console.error("Error deleting workshop:", workshopError)
+          return {
+              status: "error",
+              message: "Failed to delete workshop"
+          }
+      }
+
+      revalidatePath("/profile/admin/workshops")
+      revalidatePath("/workshops")
+
+      return {
+          status: "success",
+          message: "Workshop deleted successfully"
+      }
+  } catch (error) {
+      console.error("Delete workshop error:", error)
+      return {
+          status: "error",
+          message: "An unexpected error occurred"
+      }
+  }
+}
+
+export const userRegisterWorkshopAction = async (formData: any) => {
+  const supabase = await createClient();
+
+  console.log(formData);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return { status: "error", message: "User is not authenticated." };
+  }
+  console.log(user.id);
+  
+  const workshop_id = formData.workshopId as string;
+  const student_id =  user?.id as string;
+  const phoneNumber = formData.phoneNumber as string;
+  const student_email = formData.email as string;
+  const familliarity = formData.familliarity as string;
+  const remarks = formData.remarks as string;
+
+  const { data, error } = await supabase
+    .from("workshop_application")
+    .insert([
+      {
+        workshop_id: workshop_id,
+        student_id: student_id,
+        student_phonenum: phoneNumber,
+        student_email: student_email,
+        familiarity: familliarity,
+        remarks: remarks,
+      },
+    ]);
+
+  if (error) {
+    return { status: "error", message: error.message };
+  }
+
+  return { status: "success", message: "Successfully registered for the workshop!" };
 };

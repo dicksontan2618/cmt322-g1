@@ -3,9 +3,12 @@
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,12 +17,14 @@ import { adminEditWorkshopAction } from "@/app/actions"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCalendar } from "@fortawesome/free-regular-svg-icons"
+import { faTrash, faExclamationCircle } from "@fortawesome/free-solid-svg-icons"
 
 import { format } from "date-fns"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast"
 
+import { deleteWorkshopAction } from "@/app/actions"
 
 const formSchema = z.object({
     workshopName: z.string().min(2, {
@@ -55,6 +60,9 @@ const formSchema = z.object({
 
 export default function AdminWorkshopEditForm({workshopData}: any) {
 
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+
     const { toast } = useToast();
 
     const router = useRouter();
@@ -75,10 +83,37 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
         },
     })
 
+    const handleDeleteWorkshop = async () => {
+        try {
+            setIsDeleting(true)
+            const result = await deleteWorkshopAction(workshopData.id)
+
+            if (result.status === "success") {
+                toast({
+                    title: "Success",
+                    description: "Workshop deleted successfully",
+                })
+                setIsDialogOpen(false)
+                router.push("/profile/admin/workshops")
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to delete workshop",
+            })
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
     async function onSubmit(values: any) {
+        console.log(values);
         const mergedObject = { ...values, id: workshopData?.id ?? null }
         const result = await adminEditWorkshopAction(mergedObject);
-        
+
         const status = result.status;
         const message = result.message;
 
@@ -97,7 +132,45 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
 
   return (
     <div className="px-8 mb-8 lg:px-16 lg:py-8 text-primary">
-        <p className="font-bold text-xl lg:text-3xl mb-4">Create Workshop</p>
+        <p className="font-bold text-xl lg:text-3xl mb-4">Edit Workshop</p>
+        <div className="relative bottom-4 right-4">
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="icon" className="bg-secondary">
+                            <FontAwesomeIcon icon={faTrash} />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="text-black flex flex-col items-center justify-center rounded-md bg-white shadow-xl fixed">
+                        <DialogHeader>
+                            <div className="text-yellow-500 text-7xl text-center mb-2">
+                                <FontAwesomeIcon icon={faExclamationCircle} />
+                            </div>
+                            <DialogTitle className="text-xl font-semibold text-center text-primary">
+                                Delete Workshop?
+                            </DialogTitle>
+                            <p className="text-sm text-center text-gray-500">
+                                Do you want to delete this workshop?
+                            </p>
+                        </DialogHeader>
+                        <DialogFooter className="flex justify-center gap-4 mt-3">
+                            <Button
+                                onClick={handleDeleteWorkshop}
+                                className="bg-primary text-white hover:bg-red-700"
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? "Deleting..." : "Yes"}
+                            </Button>
+                            <Button
+                                onClick={() => setIsDialogOpen(false)}
+                                className="bg-secondary text-white hover:bg-gray-400"
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField

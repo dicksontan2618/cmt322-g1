@@ -42,12 +42,12 @@ const formSchema = z.object({
     workshopDesc: z.string().min(10, {
         message: "Workshop description must be at least 10 characters."
     }),
-    // workshopThumbnailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-    //     message: 'Your image must be less than 7MB.',
-    // }),
-    // workshopDetailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-    //     message: 'Your image must be less than 7MB.',
-    // }),
+    workshopThumbnailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
+        message: 'Your image must be less than 7MB.',
+    }),
+    workshopDetailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
+        message: 'Your image must be less than 7MB.',
+    }),
     workshopTag: z.string().min(2, {
         message: "Tag must be at least 2 characters."
     }),
@@ -71,6 +71,8 @@ export default function AdminWorkshopCreateForm() {
             speakerRole:"",
             speakerLinkedIn:"",
             workshopDesc:"",
+            workshopThumbnailImg:"",
+            workshopDetailImg: "",
             workshopTag:""
         },
     })
@@ -248,7 +250,7 @@ export default function AdminWorkshopCreateForm() {
                     </FormItem>
                 )}
                 />
-                {/* <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 md:gap-x-8">
+                <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 md:gap-x-8">
                     <FormField
                     control={form.control}
                     name="workshopThumbnailImg"
@@ -291,7 +293,7 @@ export default function AdminWorkshopCreateForm() {
                         </FormItem>
                     )}
                     />
-                </div> */}
+                </div>
                 <FormField
                 control={form.control}
                 name="workshopTag"
