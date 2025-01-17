@@ -20,7 +20,7 @@ interface WorkshopCardProps {
   
   const WorkshopCard: React.FC<WorkshopCardProps> = ({ slug,  imageSrc, title, category, date, venue, colorCode, canEdit }) => {
   return (
-    <Link href={`${!canEdit ? `/workshops/${slug}` : `/profile/admin/workshops/${slug}`}`}>
+    <Link href={`${!canEdit ? `/workshops/${slug}` : `/profile/admin/workshops/edit/${slug}`}`}>
         <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
         <CardHeader>
             <Image

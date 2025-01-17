@@ -4,7 +4,6 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
-//import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Calendar } from "@/components/ui/calendar"
@@ -306,7 +305,13 @@ export default function AdminWorkshopCreateForm() {
                     </FormItem>
                 )}
                 />
-                <Button type="submit" className="bg-secondary text-white mt-8">Create Workshop</Button>
+                <Button type="submit" className="bg-secondary text-white mt-8" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? (
+                        <span>Creating...</span>
+                    ) : (
+                        <span>Create</span>
+                    )}
+                </Button>
             </form>
         </Form>
     </div>

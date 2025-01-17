@@ -451,3 +451,53 @@ export const adminCreateWorkshopAction = async (formData: any) => {
     };
   }
 };
+
+export const adminEditWorkshopAction = async (formData: any) => {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const workshopName = formData.workshopName as string;
+  const workshopDate = formData.workshopDate as Date;
+  const workshopStart = formData.workshopStart as string;
+  const workshopEnd = formData.workshopEnd as string;
+  const workshopVenue = formData.workshopVenue as string;
+  const workshopSpeaker = formData.workshopSpeaker as string;
+  const speakerRole = formData.speakerRole as string;
+  const speakerLinkedIn = formData.speakerLinkedIn as string;
+  const workshopDesc = formData.workshopDesc as string;
+  const workshopTag = formData.workshopTag as string;
+
+  try {
+
+    // Insert workshop data into the database
+    const { data, error } = await supabase
+      .from("workshops")
+      .update({
+        name: workshopName,
+        date: workshopDate,
+        start_time: workshopStart,
+        end_time: workshopEnd,
+        venue: workshopVenue,
+        speaker_name: workshopSpeaker,
+        speaker_role: speakerRole,
+        speaker_linkedin: speakerLinkedIn,
+        description: workshopDesc,
+        tag: workshopTag,
+      }).eq("id", formData.id);
+
+    if (error) throw error;
+
+    return {
+      status: "success",
+      message: "Workshop updated successfully",
+    };
+  } catch (error: any) {
+    return {
+      status: "error",
+      message: error.message || "Failed to update workshop",
+    };
+  }
+};
