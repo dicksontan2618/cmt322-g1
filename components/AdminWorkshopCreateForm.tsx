@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { adminCreateWorkshopAction } from "@/app/actions"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -25,7 +26,9 @@ const formSchema = z.object({
     workshopName: z.string().min(2, {
         message: "Username must be at least 2 characters."
     }),
-    workshopDate: z.string().refine((value) => !isNaN(Date.parse(value)), "Invalid date"),
+    workshopDate: z.date().nullable().refine((date) => date !== null, {
+        message: "Workshop date is required.",
+    }),
     workshopStart:z.string(),
     workshopEnd:z.string(),
     workshopVenue: z.string().min(2, {
@@ -61,7 +64,7 @@ export default function AdminWorkshopCreateForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             workshopName: "",
-            workshopDate: "",
+            workshopDate: undefined,
             workshopStart:"",
             workshopEnd:"",
             workshopVenue:"",
@@ -110,15 +113,40 @@ export default function AdminWorkshopCreateForm() {
                 )}
                 />
                 <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 md:gap-x-8">
-                    <FormField
+                <FormField
                     control={form.control}
                     name="workshopDate"
                     render={({ field }) => (
                         <FormItem className="flex flex-col items-start">
                             <FormLabel>Workshop Date</FormLabel>
-                            <FormControl>
-                                <Input className="w-[80%]" placeholder="Enter date..." {...field} />
-                            </FormControl>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={
+                                            `bg-white flex justify-between items-center px-8 py-6 gap-x-8 ${!field.value && "text-muted-foreground"}`
+                                        }
+                                        >
+                                            {field.value ? (
+                                                format(field.value, "PPP")
+                                            ) : (
+                                                <span>Pick a date</span>
+                                            )}
+                                            <FontAwesomeIcon icon={faCalendar}/>
+                                        </Button>
+                                    </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    className="rounded-lg bg-gray-700 text-white"
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
                             <FormMessage/>
                         </FormItem>
                     )}
