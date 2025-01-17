@@ -379,3 +379,75 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/");
 };
+
+export const adminCreateWorkshopAction = async (formData: any) => {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const workshopName = formData.workshopName as string;
+  const workshopDate = formData.workshopDate as Date;
+  const workshopStart = formData.workshopStart as string;
+  const workshopEnd = formData.workshopEnd as string;
+  const workshopVenue = formData.workshopVenue as string;
+  const workshopSpeaker = formData.workshopSpeaker as string;
+  const speakerRole = formData.speakerRole as string;
+  const speakerLinkedIn = formData.speakerLinkedIn as string;
+  const workshopDesc = formData.workshopDesc as string;
+  // const workshopThumbnailImg = formData.workshopThumbnailImg as File;
+  // const workshopDetailImg = formData.workshopDetailImg as File;
+  const workshopTag = formData.workshopTag as string;
+
+  try {
+    // Upload images to Supabase storage
+    // const uploadImage = async (file: File, path: string) => {
+    //   const { data, error } = await supabase.storage
+    //     .from("workshop-images")
+    //     .upload(path, file, { cacheControl: "3600", upsert: false });
+
+    //   if (error) throw error;
+
+    //   return data?.path;
+    // };
+
+    // const thumbnailPath = workshopThumbnailImg
+    //   ? await uploadImage(workshopThumbnailImg, `thumbnails/${Date.now()}_${workshopThumbnailImg.name}`)
+    //   : null;
+
+    // const detailImagePath = workshopDetailImg
+    //   ? await uploadImage(workshopDetailImg, `details/${Date.now()}_${workshopDetailImg.name}`)
+    //   : null;
+
+    // Insert workshop data into the database
+    const { data, error } = await supabase
+      .from("workshops")
+      .insert({
+        name: workshopName,
+        date: workshopDate,
+        start_time: workshopStart,
+        end_time: workshopEnd,
+        venue: workshopVenue,
+        speaker_name: workshopSpeaker,
+        speaker_role: speakerRole,
+        speaker_linkedin: speakerLinkedIn,
+        description: workshopDesc,
+        // thumbnail_img: thumbnailPath,
+        // detail_img: detailImagePath,
+        tag: workshopTag,
+      });
+
+    if (error) throw error;
+
+    return {
+      status: "success",
+      message: "Workshop created successfully",
+    };
+  } catch (error: any) {
+    return {
+      status: "error",
+      message: error.message || "Failed to create workshop",
+    };
+  }
+};
