@@ -125,27 +125,80 @@ export const employerUpdateProfileAction = async (formData: any) => {
   const id = formData.id as string;
   const name = formData.companyName as string;
   const description = formData.companyDesc as string;
+  const employer_logo = formData.companyLogo as File;
 
-  const { data, error } = await supabase
-    .from("employers")
-    .upsert({
-      id,
-      name,
-      description,
-    });
-
-  if (error) {
-    return {
-      status: "error",
-      message: "Could not update profile",
+  try {
+    // Upload images to Supabase storage
+    const uploadImage = async (file: File, folder: string) => {
+      try {
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+        console.log('Attempting to upload file:', fileName);
+    
+        const { data, error } = await supabase
+          .storage
+          .from("employer_logo")
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+    
+        if (error) {
+          console.error('Upload error details:', {
+            errorMessage: error.message,
+          });
+          throw error;
+        }
+    
+        console.log('Upload successful:', data);
+    
+        // Get the public URL
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from("employer_logo")
+          .getPublicUrl(fileName);
+    
+        return publicUrl;
+      } catch (error: any) {
+        console.error('Detailed upload error:', {
+          error,
+          file: {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }
+        });
+        throw error;
+      }
     };
-  } else {
+
+    const logoUrl = employer_logo
+      ? await uploadImage(employer_logo, 'logos')
+      : null;
+
+    const { data, error } = await supabase
+      .from("employers")
+      .upsert({
+        id,
+        name,
+        description,
+        logo: logoUrl,
+      });
+    
+    if (error) throw error;
+
     return {
       status: "success",
       message: "Profile updated",
     };
+  } catch (error : any) {
+    return {
+      status: "error",
+      message: "Could not update profile",
+    };
   }
-
 }
 
 export const signInEmployerAction = async (formData: FormValues) => {

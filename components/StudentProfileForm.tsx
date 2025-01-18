@@ -15,7 +15,7 @@ export default async function StudentProfileForm() {
     .eq("id", user.id)
     .single();
 
-    // console.log(studentData);
+
     const initialData = (studentData || {
         id: studentData?.id || null,
         username: studentData?.name || null,
@@ -23,7 +23,6 @@ export default async function StudentProfileForm() {
         specialization: studentData?.specialization || null,
     });
 
-    console.log(initialData);
 
     return <StudentProfileFormClient initialData={initialData} />;
 
