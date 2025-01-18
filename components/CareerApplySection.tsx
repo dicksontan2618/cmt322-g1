@@ -52,6 +52,7 @@ interface CareerApplySectionProps {
 }
 
 const formSchema = z.object({
+    job_id: z.string(),
     name: z.string().min(2, {
         message: "Username must be at least 2 characters."
     }),
@@ -100,7 +101,7 @@ export default function CareerApplySection({ jobData, userData, canApply }: Care
       resolver: zodResolver(formSchema),
       defaultValues: {
           student_id: user?.id || "",
-          job_id: jobData.id,
+          job_id: jobData?.id || "",
           name: "",
           phoneNumber: "",
           email: "",
