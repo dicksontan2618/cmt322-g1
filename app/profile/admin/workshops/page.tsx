@@ -44,8 +44,8 @@ export default async function AdminWorkshopPage() {
             </Link>
             <p className="text-gray-600 font-semibold my-4 lg:mt-8">Created Workshop</p>
             <div className="grid grid-cols-1 gap-y-6 md:grid-cols-2 md:gap-x-4 lg:grid-cols-3 lg:gap-x-4">
-                {workshops && workshops.map((workshop: { id: string; imageSrc: string; name: string; tag: string; date: string; venue: string; }, index: Key | null | undefined) => (
-                    <WorkshopCard key={index} slug={workshop.id} imageSrc={workshop.imageSrc} title={workshop.name} category={workshop.tag} date={workshop.date} venue={workshop.venue} colorCode="#ED4989" canEdit={true} />
+                {workshops && workshops.map((workshop: { id: string; thumbnail_img: string; name: string; tag: string; date: string; venue: string; }, index: Key | null | undefined) => (
+                    <WorkshopCard key={index} slug={workshop.id} imageSrc={workshop.thumbnail_img} title={workshop.name} category={workshop.tag} date={workshop.date} venue={workshop.venue} colorCode="#ED4989" canEdit={true} />
                 ))}
             </div>
         </div>
