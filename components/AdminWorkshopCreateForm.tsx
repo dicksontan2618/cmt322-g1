@@ -42,11 +42,21 @@ const formSchema = z.object({
     workshopDesc: z.string().min(10, {
         message: "Workshop description must be at least 10 characters."
     }),
-    workshopThumbnailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-        message: 'Your image must be less than 7MB.',
+    workshopThumbnailImg: z
+        .instanceof(File)
+        .refine((file) => file && file.size > 0, {
+        message: "You must select an image.",
+        })
+        .refine((file) => file.size < 7000000, {
+        message: "Your image must be less than 7MB.",
     }),
-    workshopDetailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-        message: 'Your image must be less than 7MB.',
+    workshopDetailImg: z
+        .instanceof(File)
+        .refine((file) => file && file.size > 0, {
+        message: "You must select an image.",
+        })
+        .refine((file) => file.size < 7000000, {
+        message: "Your image must be less than 7MB.",
     }),
     workshopTag: z.string().min(2, {
         message: "Tag must be at least 2 characters."
