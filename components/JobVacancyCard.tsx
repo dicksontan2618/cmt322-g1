@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
-// import JobAnalyticsDialog from "@/components/JobAnalyticsDialog";
+import JobAnalyticsDialog from "@/components/JobAnalyticsDialog";
 
 interface JobVacancyCardProps {
   slug: string;
@@ -39,7 +39,7 @@ const JobVacancyCard: React.FC<JobVacancyCardProps> = ({ slug, jobTitle, workMod
         </Link>
 
         {/* Analytics Button */}
-        {/* <JobAnalyticsDialog /> */}
+        <JobAnalyticsDialog jobId={slug}/>
       </div>
     </Card>
   );

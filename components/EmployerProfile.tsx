@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import PostedJobSection from "@/components/PostedJobSection";
 
 function EmployerProfile({
   children,
@@ -16,13 +17,7 @@ function EmployerProfile({
       case "Profile":
         return children;
       case "Posted Jobs":
-        return (
-            <div className="p-4">
-                <div className="flex flex-col mb-6">
-                <p className="text-black font-bold text-lg lg:text-3xl">On Construction !</p>
-                </div>
-            </div>
-        )
+        return <PostedJobSection/>
       default:
         return <div className="p-4">Select an option from the left menu.</div>;
     }
