@@ -8,13 +8,6 @@ import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import WorkshopRegistrationDialog from "@/components/WorkshopRegistrationDialog";
 
 import { createClient } from "@/utils/supabase/server";
@@ -84,7 +77,7 @@ export default async function WorkshopPage({ params }: { params: Params }) {
             </div>
           </div>
           <Image
-            src={workshop.workshopDetailImg}
+            src={workshop.detail_img}
             width={1800}
             height={1800}
             alt="Workshop Detail Image"

@@ -47,12 +47,12 @@ const formSchema = z.object({
     workshopDesc: z.string().min(10, {
         message: "Workshop description must be at least 10 characters."
     }),
-    // workshopThumbnailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-    //     message: 'Your image must be less than 7MB.',
-    // }),
-    // workshopDetailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
-    //     message: 'Your image must be less than 7MB.',
-    // }),
+    workshopThumbnailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
+        message: 'Your image must be less than 7MB.',
+    }),
+    workshopDetailImg: z.instanceof(File).refine((file) => file.size < 7000000, {
+        message: 'Your image must be less than 7MB.',
+    }),
     workshopTag: z.string().min(2, {
         message: "Tag must be at least 2 characters."
     }),
@@ -79,6 +79,8 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
             speakerRole:workshopData?.speaker_role,
             speakerLinkedIn:workshopData?.speaker_linkedin,
             workshopDesc:workshopData?.description,
+            workshopThumbnailImg:workshopData?.thumbnail_img,
+            workshopDetailImg: workshopData?.detail_img,
             workshopTag:workshopData?.tag
         },
     })
@@ -110,19 +112,25 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
     }
 
     async function onSubmit(values: any) {
-        console.log(values);
-        const mergedObject = { ...values, id: workshopData?.id ?? null }
+        // Create merged object with current data and new values
+        const mergedObject = {
+            ...values,
+            id: workshopData?.id ?? null,
+            currentThumbnailPath: workshopData.thumbnail_img,
+            currentDetailPath: workshopData.detail_img
+        };
+    
         const result = await adminEditWorkshopAction(mergedObject);
-
+    
         const status = result.status;
         const message = result.message;
-
+    
         if(status === "success") {
             setTimeout(() => {
-            router.push("/profile/admin/workshops");
+                router.push("/profile/admin/workshops");
             }, 2500);
         }
-
+    
         toast({
             variant: status === "error" ? "destructive" : "default",
             title: status === "error" ? "Error" : "Success",
@@ -323,7 +331,7 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
                     </FormItem>
                 )}
                 />
-                {/* <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 md:gap-x-8">
+                <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 md:gap-x-8">
                     <FormField
                     control={form.control}
                     name="workshopThumbnailImg"
@@ -366,7 +374,7 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
                         </FormItem>
                     )}
                     />
-                </div> */}
+                </div>
                 <FormField
                 control={form.control}
                 name="workshopTag"

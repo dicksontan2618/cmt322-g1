@@ -126,8 +126,8 @@ export default function StudentProfile({
                     <div className="p-4">
                         <div className="flex flex-col mb-6">
                                 <div className="flex flex-col mb-6">
-                                    <p className="text-black font-bold text-lg lg:text-3xl">Workshops</p>
-                                    <p className="text-gray-600 font-semibold lg:text-lg">Discover workshops available !</p>
+                                    <p className="text-black font-bold text-lg lg:text-3xl">Workshops Registered</p>
+                                    <p className="text-gray-600 font-semibold lg:text-lg">See you there !</p>
                                 </div>
                                 <div className="grid grid-cols-1 gap-y-6 md:grid-cols-2 md:gap-x-4 lg:grid-cols-3 lg:gap-x-4">
                                     {workshops.map((workshop: { id: string; imageSrc: string; name: string; tag: string; date: string; venue: string; }) => (

@@ -383,43 +383,87 @@ export const signOutAction = async () => {
 
 export const adminCreateWorkshopAction = async (formData: any) => {
   const supabase = await createClient();
-
+  
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const workshopName = formData.workshopName as string;
-  const workshopDate = formData.workshopDate as Date;
-  const workshopStart = formData.workshopStart as string;
-  const workshopEnd = formData.workshopEnd as string;
-  const workshopVenue = formData.workshopVenue as string;
-  const workshopSpeaker = formData.workshopSpeaker as string;
-  const speakerRole = formData.speakerRole as string;
-  const speakerLinkedIn = formData.speakerLinkedIn as string;
-  const workshopDesc = formData.workshopDesc as string;
-  const workshopThumbnailImg = formData.workshopThumbnailImg as File;
-  const workshopDetailImg = formData.workshopDetailImg as File;
-  const workshopTag = formData.workshopTag as string;
+  if (!user) {
+    return {
+      status: "error",
+      message: "Authentication required",
+    };
+  }
+
+  const {
+    workshopName,
+    workshopDate,
+    workshopStart,
+    workshopEnd,
+    workshopVenue,
+    workshopSpeaker,
+    speakerRole,
+    speakerLinkedIn,
+    workshopDesc,
+    workshopThumbnailImg,
+    workshopDetailImg,
+    workshopTag,
+  } = formData;
 
   try {
-    //Upload images to Supabase storage
-    const uploadImage = async (file: File, path: string) => {
-      const { data, error } = await supabase
-        .storage
-        .from("workshop-thumbnail")
-        .upload(path, file);
-
-      if (error) throw error;
-
-      return data?.path;
+    // Upload images to Supabase storage
+    const uploadImage = async (file: File, folder: string) => {
+      try {
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+        console.log('Attempting to upload file:', fileName);
+    
+        const { data, error } = await supabase
+          .storage
+          .from("workshop-thumbnail")
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+    
+        if (error) {
+          console.error('Upload error details:', {
+            errorMessage: error.message,
+          });
+          throw error;
+        }
+    
+        console.log('Upload successful:', data);
+    
+        // Get the public URL
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from("workshop-thumbnail")
+          .getPublicUrl(fileName);
+    
+        return publicUrl;
+      } catch (error: any) {
+        console.error('Detailed upload error:', {
+          error,
+          file: {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }
+        });
+        throw error;
+      }
     };
 
-    const thumbnailPath = workshopThumbnailImg
-      ? await uploadImage(workshopThumbnailImg, `thumbnails/${Date.now()}_${workshopThumbnailImg.name}`)
+    // Upload images if provided
+    const thumbnailUrl = workshopThumbnailImg
+      ? await uploadImage(workshopThumbnailImg, 'thumbnails')
       : null;
 
-    const detailImagePath = workshopDetailImg
-      ? await uploadImage(workshopDetailImg, `details/${Date.now()}_${workshopDetailImg.name}`)
+    const detailImageUrl = workshopDetailImg
+      ? await uploadImage(workshopDetailImg, 'details')
       : null;
 
     // Insert workshop data into the database
@@ -435,8 +479,8 @@ export const adminCreateWorkshopAction = async (formData: any) => {
         speaker_role: speakerRole,
         speaker_linkedin: speakerLinkedIn,
         description: workshopDesc,
-        thumbnail_img: thumbnailPath,
-        detail_img: detailImagePath,
+        thumbnail_img: thumbnailUrl,
+        detail_img: detailImageUrl,
         tag: workshopTag,
       });
 
@@ -447,6 +491,7 @@ export const adminCreateWorkshopAction = async (formData: any) => {
       message: "Workshop created successfully",
     };
   } catch (error: any) {
+    console.error('Workshop creation error:', error);
     return {
       status: "error",
       message: error.message || "Failed to create workshop",
@@ -461,20 +506,84 @@ export const adminEditWorkshopAction = async (formData: any) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const workshopName = formData.workshopName as string;
-  const workshopDate = formData.workshopDate as Date;
-  const workshopStart = formData.workshopStart as string;
-  const workshopEnd = formData.workshopEnd as string;
-  const workshopVenue = formData.workshopVenue as string;
-  const workshopSpeaker = formData.workshopSpeaker as string;
-  const speakerRole = formData.speakerRole as string;
-  const speakerLinkedIn = formData.speakerLinkedIn as string;
-  const workshopDesc = formData.workshopDesc as string;
-  const workshopTag = formData.workshopTag as string;
+  if (!user) {
+    return {
+      status: "error",
+      message: "Authentication required",
+    };
+  }
+
+  const {
+    id,
+    workshopName,
+    workshopDate,
+    workshopStart,
+    workshopEnd,
+    workshopVenue,
+    workshopSpeaker,
+    speakerRole,
+    speakerLinkedIn,
+    workshopDesc,
+    workshopThumbnailImg,
+    workshopDetailImg,
+    workshopTag,
+    currentThumbnailPath,
+    currentDetailPath
+  } = formData;
 
   try {
+    // Handle image uploads
+    const uploadImage = async (file: File, folder: string, currentPath: string | null) => {
+      // If no new file is provided, return the current path
+      if (!file) return currentPath;
 
-    // Insert workshop data into the database
+      // Delete the old file if it exists
+      if (currentPath) {
+        const oldFileName = currentPath.split('/').pop();
+        if (oldFileName) {
+          await supabase
+            .storage
+            .from("workshop-thumbnail")
+            .remove([`${folder}/${oldFileName}`]);
+        }
+      }
+
+      // Upload new file
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { data, error } = await supabase
+        .storage
+        .from("workshop-thumbnail")
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from("workshop-thumbnail")
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    };
+
+    // Upload new images if provided
+    const thumbnailUrl = workshopThumbnailImg instanceof File
+      ? await uploadImage(workshopThumbnailImg, 'thumbnails', currentThumbnailPath)
+      : currentThumbnailPath;
+
+    const detailImageUrl = workshopDetailImg instanceof File
+      ? await uploadImage(workshopDetailImg, 'details', currentDetailPath)
+      : currentDetailPath;
+
+    // Update workshop data in the database
     const { data, error } = await supabase
       .from("workshops")
       .update({
@@ -487,8 +596,11 @@ export const adminEditWorkshopAction = async (formData: any) => {
         speaker_role: speakerRole,
         speaker_linkedin: speakerLinkedIn,
         description: workshopDesc,
+        thumbnail_img: thumbnailUrl,
+        detail_img: detailImageUrl,
         tag: workshopTag,
-      }).eq("id", formData.id);
+      })
+      .eq("id", id);
 
     if (error) throw error;
 
@@ -497,6 +609,7 @@ export const adminEditWorkshopAction = async (formData: any) => {
       message: "Workshop updated successfully",
     };
   } catch (error: any) {
+    console.error('Workshop update error:', error);
     return {
       status: "error",
       message: error.message || "Failed to update workshop",
