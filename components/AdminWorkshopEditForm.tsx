@@ -26,6 +26,8 @@ import { useToast } from "@/hooks/use-toast"
 
 import { deleteWorkshopAction } from "@/app/actions"
 
+import WorkshopAnalyticsDialog from "@/components/WorkshopAnalyticsDialog";
+
 const formSchema = z.object({
     workshopName: z.string().min(2, {
         message: "Username must be at least 2 characters."
@@ -141,7 +143,7 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
   return (
     <div className="px-8 mb-8 lg:px-16 lg:py-8 text-primary">
         <p className="font-bold text-xl lg:text-3xl mb-4">Edit Workshop</p>
-        <div className="relative bottom-4 right-4">
+        <div className="relative bottom-3 left-1">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                         <Button variant="outline" size="icon" className="bg-secondary">
@@ -178,6 +180,7 @@ export default function AdminWorkshopEditForm({workshopData}: any) {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                <WorkshopAnalyticsDialog workshopData={workshopData}/>
             </div>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
