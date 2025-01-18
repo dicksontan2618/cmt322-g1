@@ -770,3 +770,76 @@ export const userRegisterWorkshopAction = async (formData: any) => {
 
   return { status: "success", message: "Successfully registered for the workshop!" };
 };
+
+export const userApplyJobAction = async (formData: any) => {
+  const supabase = await createClient();
+  
+  const {
+      data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+      return {
+          status: "error",
+          message: "Authentication required",
+      };
+  }
+
+  try {
+      // Upload resume file
+      const uploadResume = async (file: File) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `resumes/${fileName}`;
+
+          const { data, error } = await supabase
+              .storage
+              .from("job-applications")
+              .upload(filePath, file, {
+                  cacheControl: '3600',
+                  upsert: false
+              });
+
+          if (error) {
+              console.error('Resume upload error:', error);
+              throw error;
+          }
+
+          // Get the public URL
+          const { data: { publicUrl } } = supabase
+              .storage
+              .from("job-applications")
+              .getPublicUrl(filePath);
+
+          return publicUrl;
+      };
+
+      // Upload the resume and get the URL
+      const resumeUrl = await uploadResume(formData.resume);
+
+      // Insert application data into the database
+      const { data, error } = await supabase
+          .from("job_application")
+          .insert({
+              student_id: user.id,
+              job_id: formData.job_id,
+              student_name: formData.name,
+              student_phonenum: formData.phoneNumber,
+              student_email: formData.email,
+              resume: resumeUrl,
+          });
+
+      if (error) throw error;
+
+      return {
+          status: "success",
+          message: "Application submitted successfully",
+      };
+  } catch (error: any) {
+      console.error('Job application error:', error);
+      return {
+          status: "error",
+          message: error.message || "Failed to submit application",
+      };
+  }
+};
