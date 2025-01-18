@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
+import { usePathname } from "next/navigation";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,19 +27,29 @@ interface CareerCardProps {
   canBookmark: boolean;
 }
 
-export default function CareerCard({ 
-  slug, 
-  imageSrc, 
-  category, 
-  jobTitle, 
-  workMode, 
+export default function CareerCard({
+  slug,
+  imageSrc,
+  category,
+  jobTitle,
+  workMode,
   company, // Default value
-  canBookmark 
+  canBookmark,
 }: CareerCardProps) {
   // State for bookmark functionality
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"add" | "remove">("add");
+  const [isVisible, setIsVisible] = useState(true); // State to control card visibility
+
+  const pathname = usePathname()
+
+  // Load bookmark status from localStorage when component mounts
+  useEffect(() => {
+    const bookmarkedJobs = JSON.parse(localStorage.getItem("bookmarkedJobs") || "[]");
+    const isJobBookmarked = bookmarkedJobs.includes(slug); // Check if current job is bookmarked
+    setIsBookmarked(isJobBookmarked);
+  }, [slug]);
 
   // Handle bookmark confirmation
   const confirmBookmarkAction = (action: "add" | "remove") => {
@@ -48,10 +59,29 @@ export default function CareerCard({
 
   // Handle the actual bookmark action
   const handleBookmarkAction = () => {
-    setIsBookmarked(pendingAction === "add");
+    const bookmarkedJobs = JSON.parse(localStorage.getItem("bookmarkedJobs") || "[]");
+
+    if (pendingAction === "add") {
+      // Add to bookmarks
+      bookmarkedJobs.push(slug);
+      localStorage.setItem("bookmarkedJobs", JSON.stringify(bookmarkedJobs));
+      setIsBookmarked(true);
+    } else if (pendingAction === "remove") {
+      // Remove from bookmarks
+      const updatedBookmarks = bookmarkedJobs.filter((jobSlug: string) => jobSlug !== slug);
+      localStorage.setItem("bookmarkedJobs", JSON.stringify(updatedBookmarks));
+      setIsBookmarked(false);
+      if (pathname === "/profile/student") {
+        setIsVisible(false);
+      }
+    }
+
     setIsDialogOpen(false);
-    // Here you would typically make an API call to update the bookmark status
   };
+
+  if (!isVisible) {
+    return null; // Do not render the card if it's not visible
+  }
 
   return (
     <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -66,7 +96,7 @@ export default function CareerCard({
             priority
           />
         </Link>
-  
+
         {/* Bookmark button */}
         {canBookmark && (
           <button
@@ -111,7 +141,7 @@ export default function CareerCard({
           </div>
         </div>
       </CardContent>
-  
+
       {/* Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="text-black flex flex-col items-center justify-center rounded-md bg-white shadow-xl fixed">

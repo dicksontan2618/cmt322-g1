@@ -3,6 +3,7 @@
 import { useState } from "react";
 import RegisteredWorkshops from "@/components/RegisteredWorkshopSection";
 import AppliedJobs from "@/components/AppliedJobsSection";
+import SavedJobs from "@/components/SavedJobsSection";
 
 export default function StudentProfile({
   children,
@@ -16,13 +17,7 @@ export default function StudentProfile({
             case "Profile":
                 return children;
             case "Saved Jobs":
-                return (
-                    <div className="p-4">
-                        <div className="flex flex-col mb-6">
-                            <p className="text-black font-bold text-lg lg:text-3xl">On Construction !</p>
-                        </div>
-                    </div>
-                );
+                return <SavedJobs />;
             case "Applied Jobs":
                 return <AppliedJobs />;
             case "Registered Workshops":
