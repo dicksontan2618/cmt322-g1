@@ -5,14 +5,15 @@ import AppliedJobsCard from "./AppliedJobsCard";
 
 interface Job {
     id: string;
-    logo: string;
+    logo?: string;
     category: string;
     title: string;
     mode: string;
     employer_id: string;
-    employers?: {
+    applicationId?: string;
+    employers?: Array<{
         logo: string;
-    };
+    }>;
 }
 
 export default function AppliedJobs() {
@@ -100,8 +101,20 @@ export default function AppliedJobs() {
                             applicationId: applicationEntry?.id, // Add `job_application` ID
                         };
                     });
-    
-                    setJobs(jobsWithApplicationId || []);
+
+                    // Transform the job data to match the Job type by extracting logo from employers array
+                    const transformedJobs = jobsWithApplicationId?.map(job => ({
+                        id: job.id,
+                        logo: job.employers?.[0]?.logo,
+                        category: job.category,
+                        title: job.title,
+                        mode: job.mode,
+                        employer_id: job.employer_id,
+                        applicationId: job.applicationId,
+                        employers: job.employers
+                    })) || [];
+
+                    setJobs(transformedJobs);
                 } else {
                     console.log("No registered jobs found");
                     setJobs([]);
@@ -165,11 +178,11 @@ export default function AppliedJobs() {
                         <AppliedJobsCard 
                         key={index} 
                         slug={career.id} 
-                        imageSrc={career.employers?.logo || "/defaultLogo.png"} 
+                        imageSrc={career.employers?.[0]?.logo || "/defaultLogo.png"} 
                         category={career.category} 
-                        jobTitle={career.title}
-                        workMode={career.mode} 
-                        applicationId={career.applicationId}
+                        jobTitle={career.title || ''}
+                        workMode={career.mode || ''} 
+                        applicationId={career.applicationId || ''}
                         />
                     ))
                     ) : (
