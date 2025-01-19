@@ -14,10 +14,18 @@ import { Button } from "@/components/ui/button";
 
 import { createBrowserClient } from "@supabase/ssr";
 
+interface Applicant {
+    id: number;
+    student_name: string;
+    student_phonenum: string;
+    student_email: string;
+    resume: string;
+}
+
 export default function JobApplicantsDialog({ jobId }: any) {
     const [open, setOpen] = useState(false);
-    const [applicants, setApplicants] = useState([]);
-    const [currentApplicant, setCurrentApplicant] = useState(null);
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [currentApplicant, setCurrentApplicant] = useState<Applicant | null>(null);
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
