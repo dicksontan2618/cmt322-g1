@@ -8,10 +8,10 @@ interface Job {
   title: string;
   mode: string;
   employer_id: string;
-  employers?: {
+  employers?: Array<{
     logo: string;
     name: string;
-  };
+  }>;
 }
 
 export default function SavedJobs() {
@@ -49,7 +49,15 @@ export default function SavedJobs() {
           }
 
           if (data) {
-            setBookmarkedJobs(data); // Set the full job details into the state
+            const transformedJobs = data.map(job => ({
+              id: job.id,
+              category: job.category,
+              title: job.title,
+              mode: job.mode,
+              employer_id: job.employer_id,
+              employers: job.employers
+            }));
+            setBookmarkedJobs(transformedJobs);
           }
         } catch (err) {
           // Log the error to the console for better debugging
@@ -88,11 +96,11 @@ export default function SavedJobs() {
               <CareerCard
                 key={index}
                 slug={job.id}
-                imageSrc={job.employers?.logo || "/defaultLogo.png"} // Default logo if none exists
+                imageSrc={job.employers?.[0]?.logo || "/defaultLogo.png"} // Default logo if none exists
                 category={job.category}
                 jobTitle={job.title}
                 workMode={job.mode}
-                company={job.employers?.name || "Unknown Company"} // Fallback for missing employer name
+                company={job.employers?.[0]?.name || "Unknown Company"} // Fallback for missing employer name
                 canBookmark={true} // Can't bookmark again since it's already bookmarked
               />
             ))}
