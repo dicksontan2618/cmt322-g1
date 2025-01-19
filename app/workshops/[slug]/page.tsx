@@ -12,9 +12,11 @@ import WorkshopRegistrationDialog from "@/components/WorkshopRegistrationDialog"
 
 import { createClient } from "@/utils/supabase/server";
 
-interface Params {
-    slug: string;
-}
+// interface Params {
+//     slug: string;
+// }
+
+type Params = Promise<{ slug: string }>;
 
 export default async function WorkshopPage({ params }: { params: Params }) {
 

@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 
 import EmployerJobEditForm from "@/components/EmployerJobEditForm";
 
-interface Params {
-    slug: string;
-}
+// interface Params {
+//     slug: string;
+// }
+
+type Params = Promise<{ slug: string }>;
 
 export default async function EditJobPage({ params }: { params: Params }) {
 
