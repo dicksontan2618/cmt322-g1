@@ -8,7 +8,7 @@ import JobVacancyCard from "@/components/JobVacancyCard";
 import { useRouter } from "next/navigation";
 
 export default function PostedJobSection() {
-    const [jobs, setJobs] = useState([]);
+    const [jobs, setJobs] = useState<any[]>([]);
     const [user, setUser] = useState(null);
     const router = useRouter();
 
@@ -35,7 +35,7 @@ export default function PostedJobSection() {
             setUser(userData);
             
             const { data: jobData } = await supabase.from("jobs").select("*").eq("employer_id", userData.id);
-            setJobs(jobData);
+            setJobs(jobData || []);
         };
         
         fetchData();
