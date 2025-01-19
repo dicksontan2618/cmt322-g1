@@ -10,9 +10,22 @@ import { faEye } from "@fortawesome/free-regular-svg-icons";
 
 import { createBrowserClient } from "@supabase/ssr";
 
+interface WorkshopStatistic {
+    remark: string;
+    familiarity: number;
+    name: string;
+    phoneNumber: string;
+    email: string;
+}
+
+interface WorkshopStats {
+    statistics: WorkshopStatistic[];
+    averageFamiliarity: string;
+}
+
 export default function WorkshopAnalyticsDialog({ workshopData }: any) {
     const [open, setOpen] = useState(false);
-    const [workshopStatistics, setWorkshopStatistics] = useState({
+    const [workshopStatistics, setWorkshopStatistics] = useState<WorkshopStats>({
         statistics: [],
         averageFamiliarity: "N/A",
     });
@@ -49,7 +62,7 @@ export default function WorkshopAnalyticsDialog({ workshopData }: any) {
                     const statistics = workshopStat.map(record => ({
                         remark: record.remarks,
                         familiarity: record.familiarity,
-                        name: record.student_id?.name || "N/A", // Name from `students` table
+                        name: record.student_id?.[0]?.name || "N/A", // Access first element of array
                         phoneNumber: record.student_phonenum || "N/A",
                         email: record.student_email || "N/A",
                     }));
