@@ -31,7 +31,7 @@ const TentativePage: React.FC = () => {
       <div className="min-h-screen flex flex-col items-center py-12">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-primary mb-4">Event Tentative</h1>
+          <h1 className="text-4xl font-extrabold text-primary mb-5">Event Tentative</h1>
           <div className="text-gray-700 flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <FontAwesomeIcon icon={faCalendar} className="text-primary w-5 h-5" />
