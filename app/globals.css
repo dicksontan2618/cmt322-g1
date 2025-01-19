@@ -59,6 +59,10 @@
   }
 }
 
+nextjs-portal {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border;

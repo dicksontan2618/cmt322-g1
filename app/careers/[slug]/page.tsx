@@ -12,8 +12,6 @@ export default async function CareerInfoPage({ params }: { params: Params }) {
     const param_details = await params;
     const slug = param_details.slug;
 
-    console.log(slug);
-
     let canApply = false;
     let userData = null;
 

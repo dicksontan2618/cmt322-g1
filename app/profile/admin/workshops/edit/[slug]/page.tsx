@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 
 import AdminWorkshopEditForm from "@/components/AdminWorkshopEditForm";
 
-interface Params {
-    slug: string;
-}
+// interface Params {
+//     slug: string;
+// }
+
+type Params = Promise<{ slug: string }>;
 
 export default async function AdminEditWorkshopPage({ params }: { params: Params }) {
 

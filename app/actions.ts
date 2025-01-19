@@ -266,7 +266,7 @@ export const signInAdminAction = async (formData: FormValues) => {
     };
   }
 
-  return redirect("/profile/admin");
+  return redirect("/profile/admin/workshops");
 };
 
 export const employerCreateJobAction = async (formData: any) => {
