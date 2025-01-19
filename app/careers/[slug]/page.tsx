@@ -1,14 +1,18 @@
 import { createClient } from "@/utils/supabase/server";
 import CareerApplySection from "@/components/CareerApplySection";
 
-interface Params {
-    slug: string;
-}
+// interface Params {
+//     slug: string;
+// }
+
+type Params = Promise<{ slug: string }>;
 
 export default async function CareerInfoPage({ params }: { params: Params }) {
 
     const param_details = await params;
     const slug = param_details.slug;
+
+    console.log(slug);
 
     let canApply = false;
     let userData = null;
